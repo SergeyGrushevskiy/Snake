@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link type="image/x-icon" href="img/favicon.ico..ico" rel="shortcut icon">
+    <title>Snake</title>
+</head>
+<body>
+   
+<div id='app'>
+    <button  id="app">Вернуться назад</button>
+ </div>
+<canvas id="game" width="608" height="608">
+</canvas>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script src="js/sound.js"></script>
+<script>
+
+    "use strict";
+
+    //render function
+
+    const IMG_URL = 'img/';
+
+    const setBG = (imgUrl) => {
+
+        const body = document.querySelector('body');
+        body.style.backgroundImage = `url(${IMG_URL}${imgUrl})`
+    }
+ 
+    const renderStartScreen = () => {
+        document.getElementById('game').style.display = `none`;
+        setBG('11.jpg')
+
+        return `
+        
+        <input type="button" class="waves-effect waves-light btn-large" value="Старт" onclick="switchToStartPage()">
+        <br>
+        <input type="button" class="waves-effect waves-light btn-large" value="Настройки" onclick="switchToSettingsPage()">
+        <br>
+        <input type="button" class="waves-effect waves-light btn-large" value="Выход" onclick="switchToExitPage()">
+      `
+    }
+
+
+    const renderSettingsScreen = () => {
+        document.getElementById('game').style.display = `none`;
+        setBG('123.jpg');
+
+        return `
+        <h3>Настройки</h3>
+        <div class="game-setting">
+             <label>
+                <input type="checkbox" id="sound"/>
+                <span>Мелодия</span>
+             </label>
+
+           <h3 style= color: #fff;> Правила игры</h3>
+            <label>
+                Игрок управляет длинным, тонким существом, напоминающим змею, которое ползает по плоскости 
+                (как правило, ограниченной стенками),
+                 собирая еду (или другие предметы), избегая столкновения с собственным хвостом и краями игрового поля
+             </label>
+        </div>
+        
+      `
+    }
+
+    // router
+    window.onhashchange = switchToStateFromURLHash;
+
+
+    function switchToStateFromURLHash() {
+        const URLHash = window.location.hash || "#start-screen";
+
+
+        let pageHTML = '';
+
+        switch (URLHash) {
+            case '#start-screen':
+            reload ();
+                pageHTML += renderStartScreen();
+                break;
+            case '#start-page':
+                pageHTML += superWrap();
+                break;
+            case '#settings-page':
+                pageHTML += renderSettingsScreen();
+                break;
+            case '#exit-page':
+                pageHTML += "<h3>Выход</h3>";
+                break;
+        }
+        document.getElementById('app').innerHTML = pageHTML;
+
+    }
+
+    function switchToState(newState) {
+        location.hash = newState.pagename;
+    }
+
+    function switchToStartScreePage() {
+        switchToState({pagename: 'start-screen'});
+    }
+
+    function switchToStartPage() {
+        switchToState({pagename: 'start-page'});
+    }
+
+    function switchToSettingsPage() {
+        switchToState({pagename: 'settings-page'});
+    }
+
+    function switchToGamePage() {
+        switchToState({pagename: 'game-page'});
+    }
+
+    function switchToExitPage() {
+        switchToState({pagename: 'exit-page'});
+    }
+
+    switchToStateFromURLHash();
+
+    //sounds
+    const mainTheme = new Audio('audio/main.mp3');
+
+    //events
+    const sound = document.getElementById('sound');
+
+    sound?.addEventListener('click', (e) => {
+        console.log(e.target.checked)
+        if(e.target.checked){
+            mainTheme.play();
+            mainTheme.currentTime=0;
+        } else{
+            mainTheme.pause();
+        }
+    })
+
+    function reload () {
+        (function()
+{
+  if( window.localStorage )
+  {
+    if( !localStorage.getItem('firstLoad') )
+    {
+      localStorage['firstLoad'] = true;
+      window.location.reload();
+    }  
+    else
+      localStorage.removeItem('firstLoad');
+  }
+})();
+    }
+    // Игра
+
+    function superWrap () {
+        reload ();
+        document.getElementById('app').style.display = `none`;
+
+
+
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext("2d");
+
+const ground = new Image();
+ground.src = "img/fon2.png";
+
+const foodImg = new Image();
+// foodImg.src = "image/mouse2.png";
+foodImg.src = "img/mouse1.png";
+
+const snakeImg = new Image();
+snakeImg.src = "img/hsnake.png";
+
+let box = 32;
+
+let score = 0;
+
+
+let food = {
+    x: Math.floor((Math.random() * 17 + 1)) * box,
+    y: Math.floor((Math.random() * 15 + 3)) * box,
+};
+
+let snake = [];
+    snake[0]= {
+        x: 9 * box,
+        y: 10 * box
+    };
+
+document.addEventListener("keydown", direction);
+
+let dir;
+
+function direction(e){
+    if(e.keyCode == 37 && dir != "right")
+       dir = "left";
+    else if(e.keyCode == 38 && dir != "down")
+       dir = "up";
+    else if(e.keyCode == 39 && dir != "left")
+       dir = "right";
+    else if(e.keyCode == 40 && dir != "up")
+       dir = "down";
+}
+
+function eatTail(head, arr ){ 
+        for ( let i = 0; i< arr.length; i++){
+            if( head.x == arr[i].x && head.y == arr[i].y)
+            clearInterval(game);
+            
+        }
+}
+
+function theEnd (){
+    document.getElementById('game').style.display = `none`;
+     setBG('12.jpg');
+     document.getElementById('app').style.display = `block`;
+     document.getElementById('app').style.color = `rgb(9 255 16)`;
+     document.getElementById('app').style.fontSize = `30px`;
+     document.getElementById('app').textContent = 'Вы проиграли!'
+     document.getElementById('app').addEventListener('click', () => {
+      history.back();
+    });
+     
+}
+
+function drawGame(){
+    ctx.drawImage(ground, 0, 0);
+
+    ctx.drawImage(foodImg, food.x, food.y)
+    
+    for (let i=0; i < snake.length; i++){
+    ctx.drawImage(snakeImg, snake[i].x, snake[i].y, box, box) ;
+        // ctx.fillRect(snake[i].x, snake[i].y, box, box);
+    }
+
+    ctx.fillStyle= "white";
+    ctx.font = "30px Arial"
+    
+    ctx.fillText(score, box * 2.5, box * 1.7);
+
+    let snakeX = snake[0].x;
+    let snakeY = snake[0].y;
+
+    if(snakeX == food.x && snakeY == food.y){
+        score++;
+        clickSound(crashSound);
+        food = {
+            x: Math.floor((Math.random() * 17 + 1)) * box,
+            y: Math.floor((Math.random() * 15 + 3)) * box,
+        };
+    } else {
+        snake.pop();
+    }
+
+    if ( snakeX < box || snakeX > box * 17 
+        || snakeY < 3 * box || snakeY > box * 17){
+
+       
+        clearInterval(game);
+        theEnd();
+        }
+       
+
+    if (dir == "left") snakeX -= box;
+    if (dir == "right") snakeX += box;
+    if (dir == "up") snakeY -= box;
+    if (dir == "down") snakeY += box;
+
+    let newHead = {
+        x: snakeX,
+        y: snakeY
+    };
+    eatTail(newHead, snake);
+
+    snake.unshift(newHead); 
+}
+
+let game = setInterval(drawGame, 100);
+
+    }
+  
+
+</script>
+
+</body>
+</html>
